@@ -1,6 +1,10 @@
-use std::{sync::mpsc::Sender, time::Instant};
+use std::{
+    io::Write,
+    sync::mpsc::{self, Sender},
+    time::Instant,
+};
 
-use shared::CollectorCommand;
+use shared::{CollectorCommand, DATA_COLLECTOR_ADDRESS};
 
 pub fn collect_data(tx: Sender<CollectorCommand>) {
     let mut sys = sysinfo::System::new_all();
@@ -23,7 +27,7 @@ pub fn collect_data(tx: Sender<CollectorCommand>) {
         let average_cpu_usage = total_cpu_usage / num_cpus as f32;
 
         let send_result = tx.send(CollectorCommand::SubmitData {
-            collector_id: 0,
+            collector_id: 1234,
             total_memory,
             used_memory,
             average_cpu_usage,
@@ -41,6 +45,21 @@ pub fn collect_data(tx: Sender<CollectorCommand>) {
     }
 }
 
+pub fn send(command: CollectorCommand) {
+    let bytes = shared::encode(command);
+    println!("Encoded {} bytes.", bytes.len());
+    let mut stream = std::net::TcpStream::connect(DATA_COLLECTOR_ADDRESS).unwrap();
+    stream.write_all(&bytes).unwrap();
+}
+
 fn main() {
-    println!("Hello, world!");
+    let (tx, rx) = mpsc::channel::<CollectorCommand>();
+
+    let _collector_thread = std::thread::spawn(move || {
+        collect_data(tx);
+    });
+
+    while let Ok(command) = rx.recv() {
+        send(command);
+    }
 }
