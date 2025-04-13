@@ -46,7 +46,7 @@
                     html += "<tbody>";
                     for (let i = 0; i < data.length; i++) {
                         html += "<tr>";
-                        let link = "/collector.html?id=" + data[i].collector_id;
+                        let link = "/collector?id=" + data[i].collector_id;
                         html += "<td><a href='" + link + "'>" + data[i].collector_id + "</a></td>";
                         var date = new Date(data[i].last_seen * 1000);
                         html += "<td>" + date + "</td>";
