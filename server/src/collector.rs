@@ -15,7 +15,7 @@ pub async fn data_collector(cnn: Pool<Sqlite>) -> anyhow::Result<()> {
     }
 }
 
-async fn new_connection(mut socket: TcpStream, address: SocketAddr, cnn: Pool<Sqlite>) {
+async fn new_connection(mut socket: TcpStream, _address: SocketAddr, cnn: Pool<Sqlite>) {
     let mut buf = vec![0u8; 1024];
     loop {
         let n = socket
